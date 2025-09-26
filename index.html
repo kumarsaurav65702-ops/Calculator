@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 20px;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .calculator {
+            width: 100%;
+        }
+
+        .display {
+            margin-bottom: 20px;
+        }
+
+        .display input {
+            width: 100%;
+            height: 80px;
+            border: none;
+            outline: none;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 2rem;
+            text-align: right;
+            padding: 0 20px;
+            pointer-events: none;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        form div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        input[type="button"] {
+            flex: 1;
+            height: 60px;
+            margin: 0 5px;
+            border: none;
+            outline: none;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="button"]:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="button"]:not(.operator):not(.equal) {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        input[type="button"]:not(.operator):not(.equal):hover {
+            background-color: white;
+        }
+
+        .operator {
+            background-color: rgba(255, 165, 0, 0.8);
+            color: white;
+        }
+
+        .operator:hover {
+            background-color: rgba(255, 165, 0, 1);
+        }
+
+        .equal {
+            background-color: rgba(0, 200, 83, 0.8);
+            color: white;
+            flex: 2.2;
+        }
+
+        .equal:hover {
+            background-color: rgba(0, 200, 83, 1);
+        }
+
+        .keyboard-hint {
+            margin-top: 15px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="calculator">
+            <form>
+                <div class="display">
+                    <input type="text" name="display" id="display" readonly>
+                </div>
+                <div>
+                    <input type="button" value="AC" class="operator" data-action="clear">
+                    <input type="button" value="DE" class="operator" data-action="backspace">
+                    <input type="button" value="." class="operator" data-action="decimal">
+                    <input type="button" value="/" class="operator" data-action="divide">
+                </div>
+                <div>
+                    <input type="button" value="7" data-value="7">
+                    <input type="button" value="8" data-value="8">
+                    <input type="button" value="9" data-value="9">
+                    <input type="button" value="*" class="operator" data-action="multiply">
+                </div>
+                <div>
+                    <input type="button" value="4" data-value="4">
+                    <input type="button" value="5" data-value="5">
+                    <input type="button" value="6" data-value="6">
+                    <input type="button" value="-" class="operator" data-action="subtract">
+                </div>
+                <div>
+                    <input type="button" value="1" data-value="1">
+                    <input type="button" value="2" data-value="2">
+                    <input type="button" value="3" data-value="3">
+                    <input type="button" value="+" class="operator" data-action="add">
+                </div>
+                <div>
+                    <input type="button" value="00" data-value="00">
+                    <input type="button" value="0" data-value="0">
+                    <input type="button" value="=" class="equal" data-action="calculate">
+                </div>
+            </form>
+            <div class="keyboard-hint">
+                Tip: You can also use your keyboard to operate the calculator
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const display = document.getElementById('display');
+            let displayValue = '';
+            
+            // Button click handlers
+            document.querySelectorAll('input[type="button"]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    const action = this.getAttribute('data-action');
+                    
+                    if (value) {
+                        displayValue += value;
+                        display.value = displayValue;
+                    } else if (action) {
+                        handleAction(action);
+                    }
+                });
+            });
+            
+            // Handle calculator actions
+            function handleAction(action) {
+                switch(action) {
+                    case 'clear':
+                        displayValue = '';
+                        display.value = '';
+                        break;
+                    case 'backspace':
+                        displayValue = displayValue.toString().slice(0, -1);
+                        display.value = displayValue;
+                        break;
+                    case 'decimal':
+                        // Prevent multiple decimal points in a number
+                        const lastNumber = displayValue.split(/[\+\-\*\/]/).pop();
+                        if (!lastNumber.includes('.')) {
+                            displayValue += '.';
+                            display.value = displayValue;
+                        }
+                        break;
+                    case 'add':
+                        displayValue += '+';
+                        display.value = displayValue;
+                        break;
+                    case 'subtract':
+                        displayValue += '-';
+                        display.value = displayValue;
+                        break;
+                    case 'multiply':
+                        displayValue += '*';
+                        display.value = displayValue;
+                        break;
+                    case 'divide':
+                        displayValue += '/';
+                        display.value = displayValue;
+                        break;
+                    case 'calculate':
+                        try {
+                            // Using Function constructor instead of eval for better security
+                            const result = new Function('return ' + displayValue)();
+                            displayValue = result.toString();
+                            display.value = displayValue;
+                        } catch (error) {
+                            display.value = 'Error';
+                            setTimeout(() => {
+                                displayValue = '';
+                                display.value = '';
+                            }, 1500);
+                        }
+                        break;
+                }
+            }
+            
+            // Keyboard support
+            document.addEventListener('keydown', function(event) {
+                const key = event.key;
+                
+                // Numbers
+                if (key >= '0' && key <= '9') {
+                    displayValue += key;
+                    display.value = displayValue;
+                    highlightButton(key);
+                }
+                // Decimal point
+                else if (key === '.') {
+                    const lastNumber = displayValue.split(/[\+\-\*\/]/).pop();
+                    if (!lastNumber.includes('.')) {
+                        displayValue += '.';
+                        display.value = displayValue;
+                        highlightButton('.');
+                    }
+                }
+                // Operators
+                else if (key === '+' || key === '-' || key === '*' || key === '/') {
+                    displayValue += key;
+                    display.value = displayValue;
+                    highlightButton(key);
+                }
+                // Enter or = for calculation
+                else if (key === 'Enter' || key === '=') {
+                    event.preventDefault(); // Prevent form submission
+                    try {
+                        const result = new Function('return ' + displayValue)();
+                        displayValue = result.toString();
+                        display.value = displayValue;
+                        highlightButton('=');
+                    } catch (error) {
+                        display.value = 'Error';
+                        setTimeout(() => {
+                            displayValue = '';
+                            display.value = '';
+                        }, 1500);
+                    }
+                }
+                // Backspace for deletion
+                else if (key === 'Backspace') {
+                    displayValue = displayValue.toString().slice(0, -1);
+                    display.value = displayValue;
+                    highlightButton('DE');
+                }
+                // Escape for clear
+                else if (key === 'Escape') {
+                    displayValue = '';
+                    display.value = '';
+                    highlightButton('AC');
+                }
+            });
+            
+            // Function to highlight button when key is pressed
+            function highlightButton(value) {
+                let button;
+                
+                if (value === 'AC' || value === 'Escape') {
+                    button = document.querySelector('[data-action="clear"]');
+                } else if (value === 'DE' || value === 'Backspace') {
+                    button = document.querySelector('[data-action="backspace"]');
+                } else if (value === '=' || value === 'Enter') {
+                    button = document.querySelector('[data-action="calculate"]');
+                } else if (value === '+') {
+                    button = document.querySelector('[data-action="add"]');
+                } else if (value === '-') {
+                    button = document.querySelector('[data-action="subtract"]');
+                } else if (value === '*') {
+                    button = document.querySelector('[data-action="multiply"]');
+                } else if (value === '/') {
+                    button = document.querySelector('[data-action="divide"]');
+                } else if (value === '.') {
+                    button = document.querySelector('[data-action="decimal"]');
+                } else {
+                    button = document.querySelector(`[data-value="${value}"]`);
+                }
+                
+                if (button) {
+                    button.style.transform = 'scale(0.95)';
+                    button.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                    setTimeout(() => {
+                        button.style.transform = '';
+                        button.style.boxShadow = '';
+                    }, 150);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
